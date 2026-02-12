@@ -1,0 +1,14 @@
+{
+  "name": "geniusk-plugin",
+  "version": "1.0.0",
+  "description": "A custom Claude Code plugin",
+  "author": {
+    "name": "geniusk"
+  },
+  "license": "MIT",
+  "keywords": ["custom", "plugin"],
+  "commands": "./commands/",
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "hooks": "./hooks/hooks.json"
+}
