@@ -6,5 +6,8 @@ node_modules/
 *~
 .env
 .env.local
-references/
+references/*
+!references/AGENTS.md
+!references/CLAUDE.md
+!references/index.md
 !skills/**/references/
