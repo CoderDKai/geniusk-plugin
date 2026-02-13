@@ -14,12 +14,19 @@ disable-model-invocation: true
 
 ### 第一步：读取上下文
 
+**文档读取**：
 - 读取同目录下的 `prd.md`（需求文档）
 - 读取同目录下的 `cases.md`（测试场景）
 - 读取同目录下的 `design.md`（技术设计）
 - 读取同目录下的 `plan.md`（任务计划）
-- 使用 `git log` 查看最近的 commits（识别本次变更范围）
-- 使用 `git diff` 获取本次变更的代码差异
+
+**Git 变更范围**：
+- 确定审查范围：`--base` 和 `--head` 参数（默认：`main..HEAD`）
+- 运行 `git diff --stat <base>..<head>` 查看变更统计
+- 运行 `git diff <base>..<head>` 获取完整差异
+- 运行 `git log <base>..<head>` 查看 commit 历史
+
+**代码读取**：
 - 读取变更涉及的源代码和测试代码
 
 ### 第二步：确认审查范围
@@ -127,15 +134,42 @@ disable-model-invocation: true
 7. **可证明影响**：如果影响其他代码，必须指出具体位置
 8. **非有意变更**：明显不是作者的有意设计
 
-### 第五步：生成结构化报告
+### 第五步：识别做得好的地方
 
-将审查结果整理成 JSON 格式：
+在标记问题之前，先识别实现中的亮点：
+
+**检查项**：
+- 良好的架构设计（模块划分清晰、职责分离）
+- 完善的错误处理（边界条件、异常捕获）
+- 高质量的测试（覆盖率高、测试真实场景）
+- 清晰的代码结构（命名规范、易读易维护）
+- 性能优化（算法选择、资源管理）
+
+**记录方式**：
+- 具体到文件和行号（如 `handler.ts:25-30`）
+- 说明为什么做得好
+- 简洁明了（每条 1 句话）
+
+### 第六步：生成结构化报告
+
+将审查结果整理成 JSON 和 Markdown 两种格式。
+
+#### JSON 格式（review.json）
 
 ```json
 {
-  "review_round": 1,
-  "review_date": "YYYY-MM-DD HH:MM:SS",
+  "last_updated": "YYYY-MM-DD HH:MM:SS",
+  "last_commit": "def456",
   "commit_range": "abc123..def456",
+  "strengths": [
+    {
+      "description": "完善的错误处理，覆盖所有边界条件",
+      "code_location": {
+        "absolute_file_path": "/path/to/handler.ts",
+        "line_range": {"start": 25, "end": 30}
+      }
+    }
+  ],
   "findings": [
     {
       "id": "CR-001",
@@ -144,11 +178,18 @@ disable-model-invocation: true
       "confidence_score": 0.95,
       "priority": 1,
       "status": "open",
-      "first_seen_round": 1,
       "code_location": {
         "absolute_file_path": "/path/to/src/api/users.ts",
         "line_range": {"start": 42, "end": 44}
-      }
+      },
+      "history": [
+        {
+          "date": "2026-02-13 10:00:00",
+          "commit": "abc123",
+          "status": "open",
+          "note": "首次发现"
+        }
+      ]
     }
   ],
   "overall_correctness": "patch is incorrect",
@@ -159,9 +200,10 @@ disable-model-invocation: true
 
 **字段说明**：
 
-- `review_round`：审查轮次（1, 2, 3...）
-- `review_date`：审查时间
-- `commit_range`：审查的 commit 范围
+- `last_updated`：最后更新时间
+- `last_commit`：最后审查的 commit SHA
+- `commit_range`：本次审查的 commit 范围
+- `strengths`：做得好的地方（数组）
 - `id`：问题唯一标识（CR-001, CR-002...）
 - `title`：≤ 80 字符，祈使句，以优先级标签开头
 - `body`：1 段 Markdown，说明为什么是问题，引用文件/行号/函数
@@ -171,9 +213,13 @@ disable-model-invocation: true
   - `open`：待修复
   - `fixed`：已修复
   - `acceptable`：用户认为可接受/这是预期行为
-- `first_seen_round`：首次发现该问题的轮次
 - `code_location`：必须包含绝对路径和行范围
 - `line_range`：尽可能短（≤ 5-10 行），精确定位问题
+- `history`：问题的历史记录（数组）
+  - `date`：记录时间
+  - `commit`：对应的 commit SHA
+  - `status`：当时的状态
+  - `note`：备注信息
 
 **优先级定义**：
 
@@ -189,52 +235,88 @@ disable-model-invocation: true
 
 忽略非阻塞问题（风格、格式、拼写、文档等）。
 
-### 第六步：多轮审查处理
+### 第七步：多轮审查处理
 
-**首次审查**（review_round = 1）：
+**统一文件模式**：
+- 所有审查记录都保存在 `review.json` 和 `review.md` 中
+- 每次审查更新文件内容，不创建新文件
+- 通过 `history` 数组追踪问题的完整历史
 
-1. 生成 `review-round-1.json` 和 `review-round-1.md`
+**首次审查**：
+
+1. 创建 `review.json` 和 `review.md`
 2. 所有问题状态为 `open`
-3. 询问用户："发现 X 个问题（P0: X, P1: X, P2: X, P3: X），如何处理？"
+3. 在 `history` 中记录首次发现的信息
+4. 询问用户："发现 X 个问题（P0: X, P1: X, P2: X, P3: X），如何处理？"
 
-**后续审查**（review_round > 1）：
+**后续审查**：
 
-1. 读取上一轮的 `review-round-N.json`
-2. 对比本轮和上一轮的问题：
-   - **已修复**：上一轮状态为 `open`，本轮代码中已不存在 → 更新为 `fixed`
-   - **新问题**：本轮新增的问题 → 状态为 `open`，记录 `first_seen_round`
-   - **持续存在**：两轮都存在且上一轮为 `open` → 保持 `open`，提示已存在 N 轮
-   - **已接受问题**：上一轮状态为 `acceptable` → 不再提示，保持 `acceptable`
-3. 生成 `review-round-N.json` 和 `review-round-N.md`
-4. 在报告中显示：
-   - 本轮新增问题
-   - 上轮已修复问题（状态变为 `fixed`）
-   - 持续存在的 `open` 问题（标注存在轮次）
-   - 不显示 `acceptable` 和 `fixed` 的问题
+1. 读取现有的 `review.json`
+2. 对比当前代码和上次审查：
+   - **已修复**：上次状态为 `open`，当前代码中已不存在 → 更新 `status` 为 `fixed`，在 `history` 中添加记录
+   - **新问题**：当前新增的问题 → 添加新条目，`status` 为 `open`，在 `history` 中记录首次发现
+   - **持续存在**：上次和本次都存在且状态为 `open` → 保持 `open`，在 `history` 中添加记录
+   - **已接受问题**：上次状态为 `acceptable` → 保持 `acceptable`，不再提示
+3. 更新 `review.json` 和 `review.md`
+4. 更新 `last_updated` 和 `last_commit` 字段
 
 **问题追踪示例**：
 
-第 1 轮审查：
+首次审查后的 `review.json`：
 ```json
 {
-  "review_round": 1,
+  "last_updated": "2026-02-13 10:00:00",
+  "last_commit": "abc123",
+  "commit_range": "main..abc123",
   "findings": [
-    {"id": "CR-001", "status": "open", "first_seen_round": 1},
-    {"id": "CR-002", "status": "open", "first_seen_round": 1}
+    {
+      "id": "CR-001",
+      "status": "open",
+      "history": [
+        {"date": "2026-02-13 10:00:00", "commit": "abc123", "status": "open", "note": "首次发现"}
+      ]
+    },
+    {
+      "id": "CR-002",
+      "status": "open",
+      "history": [
+        {"date": "2026-02-13 10:00:00", "commit": "abc123", "status": "open", "note": "首次发现"}
+      ]
+    }
   ]
 }
 ```
 
-用户修复了 CR-002，将 CR-001 标记为 acceptable。
-
-第 2 轮审查：
+用户修复了 CR-002，将 CR-001 标记为 acceptable，再次审查后：
 ```json
 {
-  "review_round": 2,
+  "last_updated": "2026-02-13 14:30:00",
+  "last_commit": "def456",
+  "commit_range": "abc123..def456",
   "findings": [
-    {"id": "CR-001", "status": "acceptable", "first_seen_round": 1},
-    {"id": "CR-002", "status": "fixed", "first_seen_round": 1, "fixed_in_round": 2},
-    {"id": "CR-003", "status": "open", "first_seen_round": 2}
+    {
+      "id": "CR-001",
+      "status": "acceptable",
+      "history": [
+        {"date": "2026-02-13 10:00:00", "commit": "abc123", "status": "open", "note": "首次发现"},
+        {"date": "2026-02-13 14:30:00", "commit": "def456", "status": "acceptable", "note": "用户标记为可接受"}
+      ]
+    },
+    {
+      "id": "CR-002",
+      "status": "fixed",
+      "history": [
+        {"date": "2026-02-13 10:00:00", "commit": "abc123", "status": "open", "note": "首次发现"},
+        {"date": "2026-02-13 14:30:00", "commit": "def456", "status": "fixed", "note": "已修复"}
+      ]
+    },
+    {
+      "id": "CR-003",
+      "status": "open",
+      "history": [
+        {"date": "2026-02-13 14:30:00", "commit": "def456", "status": "open", "note": "首次发现"}
+      ]
+    }
   ]
 }
 ```
@@ -254,7 +336,7 @@ disable-model-invocation: true
 - "仍待处理：X 个 open 问题"
 - 询问下一步操作
 
-### 第七步：评论质量要求
+### 第八步：评论质量要求
 
 每个问题的 `body` 必须：
 
@@ -267,60 +349,81 @@ disable-model-invocation: true
 7. **易于理解**（原作者无需仔细阅读即可理解）
 8. **避免无用的恭维**
 
-### 第八步：输出报告
+### 第九步：输出报告
 
 **文件结构**：
 
 ```
 docs/plans/YYYY-MM-DD/<主题>/
-├── review-round-1.json      # 第 1 轮结构化报告
-├── review-round-1.md        # 第 1 轮人类可读报告
-├── review-round-2.json      # 第 2 轮结构化报告
-├── review-round-2.md        # 第 2 轮人类可读报告
-└── review-summary.md        # 所有轮次汇总
+├── review.json          # 结构化报告（包含所有历史）
+├── review.md            # 人类可读报告
+└── review-summary.md    # 可选的汇总
 ```
 
 **Markdown 报告格式**：
 
 ```markdown
-# 代码审查报告 - 第 N 轮
+# 代码审查报告
 
-> 审查日期：YYYY-MM-DD HH:MM:SS
+> 最后更新：YYYY-MM-DD HH:MM:SS
 > Commit 范围：abc123..def456
+> **整体判断：✅ 可以合并** (patch is correct) 或 **❌ 需要修复** (patch is incorrect)
 
 ## 审查概要
 
 - 变更规模：X 个文件，+Y/-Z 行
-- 本轮问题：X 个（P0: X, P1: X, P2: X, P3: X）
-- 已修复：X 个（自上轮以来）
-- 已接受：X 个（用户标记为 acceptable）
-- 整体判断：patch is correct / patch is incorrect
+- 问题统计：X 个 P0，X 个 P1，X 个 P2，X 个 P3
+- 待处理：X 个 open
+- 已修复：X 个 fixed
+- 已接受：X 个 acceptable
 
-## 本轮新增问题
+## 做得好的地方
+
+- 完善的错误处理，覆盖所有边界条件 (`handler.ts:25-30`)
+- 测试覆盖率达到 85%，包含边界场景测试 (`handler.test.ts`)
+- 清晰的模块划分，职责分离良好 (`src/api/`)
+
+## 待处理问题 (open)
 
 ### [P1] CR-003: 缺少错误处理
 
 **位置**：`src/api/handler.ts:25-27`
 
-**描述**：...
+**描述**：当数据库连接失败时，未捕获异常会导致进程崩溃。应添加 try-catch 并返回 500 错误。
 
-**建议**：...
+**建议**：在 `handler.ts:25` 添加 try-catch 块，捕获数据库异常。
 
-## 持续存在的问题
+**首次发现**：2026-02-13 14:30:00 (commit: def456)
 
-### [P1] CR-001: 未验证用户输入导致 SQL 注入风险
+---
 
-**位置**：`src/api/users.ts:42-44`
+### [P2] CR-004: 性能优化机会
 
-**首次发现**：第 1 轮（已存在 2 轮）
+**位置**：`src/utils/parser.ts:15-20`
 
-**描述**：...
+**描述**：在循环中重复调用 `JSON.parse`，当数组长度 > 1000 时会有明显性能问题。建议缓存解析结果。
 
-## 已修复问题
+**首次发现**：2026-02-13 14:30:00 (commit: def456)
+
+## 已修复问题 (fixed)
 
 ### [P1] CR-002: 资源泄漏
 
-**修复于**：第 2 轮
+**位置**：`src/db/connection.ts:42-44`
+
+**修复于**：2026-02-13 14:30:00 (commit: def456)
+
+**原问题**：数据库连接未关闭，导致连接池耗尽。
+
+## 已接受问题 (acceptable)
+
+### [P2] CR-001: 代码重复
+
+**位置**：`src/api/users.ts:30-35` 和 `src/api/posts.ts:25-30`
+
+**接受原因**：用户表示两个模块未来会有不同的验证逻辑，暂不抽象。
+
+**首次发现**：2026-02-13 10:00:00 (commit: abc123)
 
 ## 场景覆盖检查
 
@@ -328,14 +431,10 @@ docs/plans/YYYY-MM-DD/<主题>/
 |---------|------|------|
 | TC-PARAM-001 | ✓ 已覆盖 | |
 | TC-SEC-001 | ✗ 未覆盖 | 缺少 SQL 注入测试 |
-
-## 正面反馈
-
-- 错误处理逻辑清晰
-- 测试覆盖率提升至 85%
+| TC-PERF-001 | ✓ 已覆盖 | |
 ```
 
-### 第九步：用户交互
+### 第十步：用户交互
 
 **首次审查**：
 - 呈现审查报告
@@ -344,7 +443,7 @@ docs/plans/YYYY-MM-DD/<主题>/
 
 **后续审查**：
 - 显示修复进度："已修复 X 个，已接受 X 个，仍有 X 个待处理"
-- 列出本轮新增问题和持续存在的问题
+- 列出新增问题和持续存在的问题
 - 询问："如何处理剩余问题？"
 
 **用户可选操作**：
@@ -364,22 +463,22 @@ docs/plans/YYYY-MM-DD/<主题>/
 3. 修复完成后：
    - 运行完整测试套件
    - 询问："是否重新审查？"
-   - 如果是，进入下一轮审查（review_round + 1）
+   - 如果是，重新执行审查流程
 
 ## 标记为 acceptable
 
 如果用户认为某个问题是可接受的：
 
-1. 询问原因（记录到 JSON 中）
+1. 询问原因（记录到 `history` 中的 `note` 字段）
 2. 更新问题状态为 `acceptable`
 3. 该问题在后续审查中不再提示
-4. 在 review-summary.md 中记录接受原因
+4. 在 `review.json` 的 `history` 中记录接受原因
 
 ## 输出
 
-- `docs/plans/YYYY-MM-DD/<主题>/review-round-N.json`（结构化报告）
-- `docs/plans/YYYY-MM-DD/<主题>/review-round-N.md`（人类可读报告）
-- `docs/plans/YYYY-MM-DD/<主题>/review-summary.md`（所有轮次汇总）
+- `docs/plans/YYYY-MM-DD/<主题>/review.json`（结构化报告，包含所有历史）
+- `docs/plans/YYYY-MM-DD/<主题>/review.md`（人类可读报告）
+- `docs/plans/YYYY-MM-DD/<主题>/review-summary.md`（可选的汇总）
 
 ## 原则
 
