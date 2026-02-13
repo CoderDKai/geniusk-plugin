@@ -69,6 +69,21 @@ python scripts/pict_helper.py format output.txt
 
 将最终文档写入 `docs/plans/YYYY-MM-DD/<主题>/cases.md`，与 `prd.md` 同目录。
 
+**输出格式**：参考 `template.md`，包含以下内容：
+- 每个场景使用表格格式
+- 每个场景有唯一编号（如 TC-PARAM-001）
+- 编号前缀规则：
+  - `TC-PARAM-*`：参数组合场景
+  - `TC-STATE-*`：状态转换场景
+  - `TC-FAULT-*`：故障场景
+  - `TC-BOUND-*`：边界值场景
+  - `TC-SEC-*`：安全场景
+  - `TC-PERF-*`：性能场景
+  - `TC-A11Y-*`：可访问性场景
+  - `TC-COMPAT-*`：兼容性场景
+  - `TC-DATA-*`：数据一致性场景
+  - `TC-FLOW-*`：用户流程场景
+
 ## 原则
 
 - **PICT 生成参数组合** - 用算法保证覆盖率，不靠 AI 猜组合
