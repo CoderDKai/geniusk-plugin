@@ -40,6 +40,14 @@ python scripts/pict_helper.py format output.txt
 
 对照 `checklists/` 下的 checklist，根据 PRD 内容生成对应维度的场景。
 
+**使用 MCP 工具补充最新测试实践**：
+- 使用 **Context7** 查询测试框架的最新文档和推荐场景
+  - 查询相关测试框架的最新版本特性
+  - 获取官方推荐的测试场景模板
+- 使用 **Exa** 搜索行业测试标准和最佳实践
+  - 搜索特定领域的测试标准（如安全测试、性能测试）
+  - 查询真实项目的测试案例
+
 #### 核心维度（每次必须覆盖）
 
 | 维度 | Checklist | 说明 |
@@ -59,6 +67,8 @@ python scripts/pict_helper.py format output.txt
 | 兼容性 | `checklists/compatibility.md` | 跨平台、跨浏览器 |
 | 数据一致性 | `checklists/data-consistency.md` | 涉及数据写入、并发操作 |
 | 用户流程 | `checklists/user-flows.md` | 涉及多步骤交互 |
+
+**注意**：结合本地 checklist 和 MCP 工具查询结果，确保场景覆盖度和时效性。
 
 ### 第四步：用户审核
 

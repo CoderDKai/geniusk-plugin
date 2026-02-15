@@ -1,14 +1,31 @@
 {
   "name": "geniusk-plugin",
   "version": "1.0.0",
-  "description": "A custom Claude Code plugin",
+  "description": "A custom Claude Code plugin with Context7 and Exa integration",
   "author": {
     "name": "geniusk"
   },
   "license": "MIT",
-  "keywords": ["custom", "plugin"],
+  "keywords": ["custom", "plugin", "context7", "exa", "mcp"],
   "commands": "./commands/",
   "agents": "./agents/",
   "skills": "./skills/",
-  "hooks": "./hooks/hooks.json"
+  "hooks": "./hooks/hooks.json",
+  "mcp": {
+    "context7": {
+      "description": "查询最新的技术文档和代码示例",
+      "tools": [
+        "mcp__context7__resolve-library-id",
+        "mcp__context7__query-docs"
+      ]
+    },
+    "exa": {
+      "description": "Web 搜索、代码搜索和公司研究",
+      "tools": [
+        "mcp__exa__web_search_exa",
+        "mcp__exa__get_code_context_exa",
+        "mcp__exa__company_research_exa"
+      ]
+    }
+  }
 }
