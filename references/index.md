@@ -270,26 +270,69 @@ references/
                 ├── plan.md # 示例实现计划
                 └── scaffold.sh # 项目脚手架脚本
 
-└── pypict-claude-skill/ # PICT 组合测试用例设计工具
-    ├── SKILL.md # 核心技能定义：PICT 测试设计工作流
-    ├── README.md # 项目主文档，介绍 PICT 和使用方式
-    ├── QUICKSTART.md # 快速入门指南
-    ├── STRUCTURE.md # 项目结构说明
-    ├── CONTRIBUTING.md # 贡献指南
-    ├── PUBLISHING.md # 发布指南
-    ├── CHANGELOG.md # 版本变更日志
-    ├── LICENSE # MIT 开源许可证
-    ├── .claude-plugin/ # Claude Code 插件元数据
-    │   └── plugin.json # 插件元数据定义
-    ├── scripts/ # 辅助脚本
-    │   └── pict_helper.py # PICT 模型生成和输出格式化工具
-    ├── references/ # PICT 参考资料
-    │   ├── pict_syntax.md # PICT 完整语法参考
-    │   └── examples.md # 各领域实战示例集
-    └── examples/ # 使用示例
-        ├── login_form/ # 登录表单测试示例
-        ├── api_endpoint/ # API 端点测试示例
-        ├── ecommerce_checkout/ # 电商结账测试示例
-        ├── file_upload/ # 文件上传测试示例
-        └── user_registration/ # 用户注册测试示例
+├── pypict-claude-skill/ # PICT 组合测试用例设计工具
+│   ├── SKILL.md # 核心技能定义：PICT 测试设计工作流
+│   ├── README.md # 项目主文档，介绍 PICT 和使用方式
+│   ├── QUICKSTART.md # 快速入门指南
+│   ├── STRUCTURE.md # 项目结构说明
+│   ├── CONTRIBUTING.md # 贡献指南
+│   ├── PUBLISHING.md # 发布指南
+│   ├── CHANGELOG.md # 版本变更日志
+│   ├── LICENSE # MIT 开源许可证
+│   ├── .claude-plugin/ # Claude Code 插件元数据
+│   │   └── plugin.json # 插件元数据定义
+│   ├── scripts/ # 辅助脚本
+│   │   └── pict_helper.py # PICT 模型生成和输出格式化工具
+│   ├── references/ # PICT 参考资料
+│   │   ├── pict_syntax.md # PICT 完整语法参考
+│   │   └── examples.md # 各领域实战示例集
+│   └── examples/ # 使用示例
+│       ├── login_form/ # 登录表单测试示例
+│       ├── api_endpoint/ # API 端点测试示例
+│       ├── ecommerce_checkout/ # 电商结账测试示例
+│       ├── file_upload/ # 文件上传测试示例
+│       └── user_registration/ # 用户注册测试示例
+│
+└── claude-code-infrastructure-showcase/ # Claude Code 基础设施展示仓库
+    ├── README.md # 项目主文档，包含 6 个月生产环境经验总结
+    ├── CLAUDE_INTEGRATION_GUIDE.md # Claude 集成指南，AI 辅助设置的分步说明
+    │
+    ├── .claude/ # Claude Code 基础设施
+    │   ├── skills/ # 5 个生产级技能
+    │   │   ├── backend-dev-guidelines/ # Node.js/Express/TypeScript 模式(12 个资源文件)
+    │   │   ├── frontend-dev-guidelines/ # React/TypeScript/MUI v7 模式(11 个资源文件)
+    │   │   ├── skill-developer/ # 创建技能的元技能(7 个资源文件)
+    │   │   ├── route-tester/ # 测试认证 API 路由
+    │   │   ├── error-tracking/ # Sentry 集成模式
+    │   │   └── skill-rules.json # 技能自动激活配置
+    │   │
+    │   ├── hooks/ # 6 个自动化钩子
+    │   │   ├── skill-activation-prompt.sh # 【必备】基于提示词自动建议相关技能
+    │   │   ├── skill-activation-prompt.ts # 【必备】技能激活 TypeScript 实现
+    │   │   ├── post-tool-use-tracker.sh # 【必备】跟踪文件更改以维护上下文
+    │   │   ├── tsc-check.sh # 【可选】TypeScript 编译检查(需定制化)
+    │   │   ├── trigger-build-resolver.sh # 【可选】编译失败时自动启动错误修复代理
+    │   │   ├── error-handling-reminder.sh # 【可选】错误处理提醒
+    │   │   └── stop-build-check-enhanced.sh # 【可选】增强的停止时构建检查
+    │   │
+    │   ├── agents/ # 10 个专用代理
+    │   │   ├── code-architecture-reviewer.md # 代码架构审查
+    │   │   ├── code-refactor-master.md # 代码重构规划与执行
+    │   │   ├── documentation-architect.md # 生成全面的文档
+    │   │   ├── frontend-error-fixer.md # 前端错误调试
+    │   │   ├── plan-reviewer.md # 审查开发计划
+    │   │   ├── refactor-planner.md # 创建重构策略
+    │   │   ├── web-research-specialist.md # 在线技术问题研究
+    │   │   ├── auth-route-tester.md # 测试认证端点
+    │   │   ├── auth-route-debugger.md # 调试认证问题
+    │   │   └── auto-error-resolver.md # 自动修复 TypeScript 错误
+    │   │
+    │   └── commands/ # 3 个斜杠命令
+    │       ├── dev-docs.md # 创建结构化开发文档
+    │       ├── dev-docs-update.md # 在上下文重置前更新文档
+    │       └── route-research-for-testing.md # 研究路由模式以进行测试
+    │
+    └── dev/ # 开发文档模式示例
+        └── active/ # 活跃开发文档目录
+            └── public-infrastructure-repo/ # 公共基础设施仓库示例
 ```
