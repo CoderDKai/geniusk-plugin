@@ -6,9 +6,12 @@ node_modules/
 *~
 .env
 .env.local
-references/*
+references/repos/
 !references/AGENTS.md
 !references/CLAUDE.md
 !references/index.md
 !references/mcp-tools-guide.md
+!references/CONTRIBUTING.md
+!references/clone-all.sh
+!references/details/
 !skills/**/references/
